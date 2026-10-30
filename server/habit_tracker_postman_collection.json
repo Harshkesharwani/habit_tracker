@@ -1,0 +1,760 @@
+{
+  "info": {
+    "_postman_id": "a9c7b2e1-45f8-4e89-b1d3-832048f07e5b",
+    "name": "Habit Tracker REST API",
+    "description": "Comprehensive Postman Collection for Habit Tracker Take-Home Full-Stack Application (Django REST Framework Backend). Covers Authentication, Habits CRUD, Completions & Streaks, Dashboard Stats, Custom Challenges, Pomodoro Focus Sessions, Labels, Trash Management, and CSV Data Export.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "demo@example.com",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "habitId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "challengeId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "labelId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "currentDate",
+      "value": "2026-10-30",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "Authorization",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "Token {{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Signup User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.token) {",
+                  "        pm.collectionVariables.set('authToken', json.token);",
+                  "        console.log('Saved new authToken:', json.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Tanay\",\n  \"lastName\": \"Pratap\",\n  \"email\": \"user_{{$timestamp}}@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            },
+            "description": "Registers a new user account with first name, last name, unique email, and password (min 6 characters). Returns a DRF authentication token and user profile."
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.token) {",
+                  "        pm.collectionVariables.set('authToken', json.token);",
+                  "        console.log('Saved login authToken:', json.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates user credentials and returns a persistent authentication token. The test script automatically updates the collection variable {{authToken}}."
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Returns profile information for the authenticated user based on the Token in the Authorization header."
+          }
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Invalidates the current session token on the server."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Habits Management",
+      "item": [
+        {
+          "name": "List Active Habits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits?status=active&date={{currentDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter by habit status: active, archived, or all"
+                },
+                {
+                  "key": "date",
+                  "value": "{{currentDate}}",
+                  "description": "Target date (YYYY-MM-DD) to calculate todayCompletions for"
+                }
+              ]
+            },
+            "description": "Returns all active habits belonging exclusively to the authenticated user."
+          }
+        },
+        {
+          "name": "List Habits by Category / Area",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits?status=active&category=Health%20%26%20Fitness",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "category",
+                  "value": "Health %26 Fitness",
+                  "description": "Filter habits matching this life area or label"
+                }
+              ]
+            },
+            "description": "Returns active habits matching a specific life area (case-insensitive)."
+          }
+        },
+        {
+          "name": "List Archived Habits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits?status=archived",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "archived"
+                }
+              ]
+            },
+            "description": "Returns habits that have been archived by the user."
+          }
+        },
+        {
+          "name": "List All Habits (Active + Archived)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits?status=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Returns all non-trashed habits."
+          }
+        },
+        {
+          "name": "Create Habit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.id) {",
+                  "        pm.collectionVariables.set('habitId', String(json.id));",
+                  "        console.log('Saved created habitId:', json.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Daily 5km Morning Run\",\n  \"description\": \"Jog through the park before breakfast\",\n  \"startDate\": \"{{currentDate}}\",\n  \"endDate\": null,\n  \"goal\": 1,\n  \"frequency\": \"DAILY\",\n  \"color\": \"blue\",\n  \"category\": \"Health & Fitness\",\n  \"reminderTime\": \"07:00\",\n  \"status\": \"ACTIVE\",\n  \"labelNames\": [\n    \"Health & Fitness\",\n    \"Productivity\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/habits",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits"]
+            },
+            "description": "Creates a new habit with goal, frequency, color theme, category, reminder time, and label associations."
+          }
+        },
+        {
+          "name": "Get Habit Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}"]
+            },
+            "description": "Retrieves the single habit specified by {{habitId}}. Strictly enforces tenant isolation (404 if not owned)."
+          }
+        },
+        {
+          "name": "Update Habit (Partial Update)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Daily 6km Morning Run (Updated)\",\n  \"goal\": 2,\n  \"category\": \"Health & Fitness\",\n  \"reminderTime\": \"06:45\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}"]
+            },
+            "description": "Partially updates an existing habit's name, goal, frequency, category, or reminder."
+          }
+        },
+        {
+          "name": "Archive Habit",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}", "archive"]
+            },
+            "description": "Moves the habit to Archived status. It will no longer appear in the active habit grid."
+          }
+        },
+        {
+          "name": "Unarchive Habit",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}/unarchive",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}", "unarchive"]
+            },
+            "description": "Restores an archived habit back to Active status."
+          }
+        },
+        {
+          "name": "Soft-Delete Habit (Move to Trash)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}"]
+            },
+            "description": "Soft-deletes the habit by moving it to Trash. Can be restored from the Trash endpoint."
+          }
+        },
+        {
+          "name": "Export Habits & Completions to CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/export/csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "export", "csv"]
+            },
+            "description": "Generates and streams a downloadable RFC 4180 CSV containing all habit configurations, categories, streaks, and total completion counts."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Completions & Streaks",
+      "item": [
+        {
+          "name": "Record Habit Completion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}/completions/{{currentDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}", "completions", "{{currentDate}}"]
+            },
+            "description": "Records or increments completion count for a habit on a specific calendar date (YYYY-MM-DD). Enforces unique record per (habit, date) pair at the database constraint level."
+          }
+        },
+        {
+          "name": "Undo Habit Completion",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}/completions/{{currentDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}", "completions", "{{currentDate}}"]
+            },
+            "description": "Undoes or decrements the completion count for the given habit and date. Deletes the completion row when count reaches zero."
+          }
+        },
+        {
+          "name": "List Habit Completions (Date Range)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/habits/{{habitId}}/completions?from=2026-10-01&to=2026-10-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["habits", "{{habitId}}", "completions"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Retrieves completion history for a single habit within an optional date range."
+          }
+        },
+        {
+          "name": "Get All Completions for Calendar Matrix",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/completions",
+              "host": ["{{baseUrl}}"],
+              "path": ["completions"]
+            },
+            "description": "Retrieves all completion records across all habits for the authenticated user. Used by the Calendar Popover widget."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Get Dashboard Statistics & Habit Score",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats?date={{currentDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "stats"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{currentDate}}",
+                  "description": "Calculation target date (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Calculates real-time metrics dynamically from completion records: completedToday, inProgress, overdue, total, and habitScore (0-100%)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Habit Challenges",
+      "item": [
+        {
+          "name": "List All Challenges",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/challenges",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges"]
+            },
+            "description": "Lists all user challenges and sprint templates (7-day, 14-day, 21-day, 30-day)."
+          }
+        },
+        {
+          "name": "Create Custom Challenge Sprint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.id) {",
+                  "        pm.collectionVariables.set('challengeId', String(json.id));",
+                  "        console.log('Saved challengeId:', json.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"30-Day Deep Work Challenge\",\n  \"description\": \"Focus for 2 hours daily without phone or distractors\",\n  \"category\": \"Career & Work\",\n  \"durationDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challenges",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges"]
+            },
+            "description": "Creates a new custom habit challenge sprint."
+          }
+        },
+        {
+          "name": "Toggle Challenge Sprint Completion",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isCompleted\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challenges/{{challengeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges", "{{challengeId}}"]
+            },
+            "description": "Toggles or updates the completion status of a challenge sprint."
+          }
+        },
+        {
+          "name": "Delete Challenge",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/challenges/{{challengeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["challenges", "{{challengeId}}"]
+            },
+            "description": "Deletes a custom challenge sprint."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Pomodoro Focus Sessions",
+      "item": [
+        {
+          "name": "List Pomodoro Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pomodoro",
+              "host": ["{{baseUrl}}"],
+              "path": ["pomodoro"]
+            },
+            "description": "Lists all recorded focus intervals and Pomodoro sessions."
+          }
+        },
+        {
+          "name": "Log Pomodoro Focus Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"habitId\": {{habitId}},\n  \"habitTitle\": \"Daily 5km Morning Run\",\n  \"durationMinutes\": 25,\n  \"mode\": \"pomodoro\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pomodoro",
+              "host": ["{{baseUrl}}"],
+              "path": ["pomodoro"]
+            },
+            "description": "Logs a completed 25-minute Pomodoro, 5-minute Short Break, or 15-minute Long Break session linked to a habit."
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Labels Management",
+      "item": [
+        {
+          "name": "List Labels with Habit Counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/labels",
+              "host": ["{{baseUrl}}"],
+              "path": ["labels"]
+            },
+            "description": "Lists all user labels with dynamic habit_count."
+          }
+        },
+        {
+          "name": "Create Label",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.id) {",
+                  "        pm.collectionVariables.set('labelId', String(json.id));",
+                  "        console.log('Saved labelId:', json.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mindfulness & Zen\",\n  \"color\": \"#10b981\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/labels",
+              "host": ["{{baseUrl}}"],
+              "path": ["labels"]
+            },
+            "description": "Creates a new tag/label with custom hex color."
+          }
+        },
+        {
+          "name": "Delete Label",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/labels/{{labelId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["labels", "{{labelId}}"]
+            },
+            "description": "Deletes a label. Associated habits remain intact."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Trash Management",
+      "item": [
+        {
+          "name": "List Trashed Habits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trash",
+              "host": ["{{baseUrl}}"],
+              "path": ["trash"]
+            },
+            "description": "Lists all habits currently in Trash (soft-deleted)."
+          }
+        },
+        {
+          "name": "Restore Habit from Trash",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trash/{{habitId}}/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["trash", "{{habitId}}", "restore"]
+            },
+            "description": "Restores a trashed habit back to Active status."
+          }
+        },
+        {
+          "name": "Permanently Delete Habit",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trash/{{habitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["trash", "{{habitId}}"]
+            },
+            "description": "Permanently and irreversibly removes the habit from the database."
+          }
+        },
+        {
+          "name": "Empty Entire Trash",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trash/empty",
+              "host": ["{{baseUrl}}"],
+              "path": ["trash", "empty"]
+            },
+            "description": "Permanently deletes all items in the user's trash."
+          }
+        }
+      ]
+    }
+  ]
+}

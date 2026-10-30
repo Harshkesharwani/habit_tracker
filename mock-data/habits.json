@@ -1,0 +1,40 @@
+{
+  "habits": [
+    {
+      "id": "habit-001",
+      "userId": "user-001",
+      "name": "Read",
+      "description": "Read for 20 minutes",
+      "startDate": "2026-10-01",
+      "frequency": "DAILY",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "habit-002",
+      "userId": "user-001",
+      "name": "Walk",
+      "description": "Take a short walk",
+      "startDate": "2026-10-03",
+      "frequency": "DAILY",
+      "status": "ACTIVE"
+    }
+  ],
+  "completions": [
+    {
+      "id": "completion-001",
+      "habitId": "habit-001",
+      "date": "2026-10-25"
+    },
+    {
+      "id": "completion-002",
+      "habitId": "habit-001",
+      "date": "2026-10-26"
+    },
+    {
+      "id": "completion-003",
+      "habitId": "habit-002",
+      "date": "2026-10-26"
+    }
+  ],
+  "note": "Sample data for frontend-track development; not production data."
+}
