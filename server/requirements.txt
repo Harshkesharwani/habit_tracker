@@ -1,0 +1,17 @@
+# Habit Tracker Backend Dependencies
+# Compatible with Python 3.10, 3.11, 3.12, 3.13, and 3.14
+
+# Core Framework & REST API
+Django==6.1.2
+djangorestframework==3.18.3
+django-cors-headers==4.9.0
+
+# Async & SQL Parsing Utilities
+asgiref==3.13.0
+sqlparse==0.6.0
+tzdata==2026.6
+
+# Optional Database Connector for MySQL setups
+# PyMySQL is pure-Python and installs without C++ build tools
+pymysql>=1.1.0
+cryptography>=42.0.0
