@@ -98,6 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'habits_api.authentication.BearerOrTokenAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],

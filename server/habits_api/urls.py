@@ -1,42 +1,42 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
     # Auth
-    path('auth/signup', views.signup_view, name='auth-signup'),
-    path('auth/login', views.login_view, name='auth-login'),
-    path('auth/logout', views.logout_view, name='auth-logout'),
-    path('auth/me', views.me_view, name='auth-me'),
+    re_path(r'^auth/signup/?$', views.signup_view, name='auth-signup'),
+    re_path(r'^auth/login/?$', views.login_view, name='auth-login'),
+    re_path(r'^auth/logout/?$', views.logout_view, name='auth-logout'),
+    re_path(r'^auth/me/?$', views.me_view, name='auth-me'),
 
     # Habits
-    path('habits', views.habits_list_create_view, name='habits-list-create'),
-    path('habits/export/csv', views.export_csv_view, name='habits-export-csv'),
-    path('habits/<int:pk>', views.habit_detail_view, name='habit-detail'),
-    path('habits/<int:pk>/archive', views.habit_archive_view, name='habit-archive'),
-    path('habits/<int:pk>/unarchive', views.habit_unarchive_view, name='habit-unarchive'),
+    re_path(r'^habits/export/csv/?$', views.export_csv_view, name='habits-export-csv'),
+    re_path(r'^habits/(?P<pk>\d+)/archive/?$', views.habit_archive_view, name='habit-archive'),
+    re_path(r'^habits/(?P<pk>\d+)/unarchive/?$', views.habit_unarchive_view, name='habit-unarchive'),
+    re_path(r'^habits/(?P<pk>\d+)/completions/(?P<date_str>[\w-]+)/?$', views.habit_completion_date_view, name='habit-completion-date'),
+    re_path(r'^habits/(?P<pk>\d+)/completions/?$', views.habit_completions_list_view, name='habit-completions-list'),
+    re_path(r'^habits/(?P<pk>\d+)/?$', views.habit_detail_view, name='habit-detail'),
+    re_path(r'^habits/?$', views.habits_list_create_view, name='habits-list-create'),
 
     # Completions
-    path('habits/<int:pk>/completions', views.habit_completions_list_view, name='habit-completions-list'),
-    path('habits/<int:pk>/completions/<str:date_str>', views.habit_completion_date_view, name='habit-completion-date'),
-    path('completions', views.all_completions_view, name='all-completions'),
+    re_path(r'^completions/?$', views.all_completions_view, name='all-completions'),
 
     # Dashboard & Stats
-    path('dashboard/stats', views.dashboard_stats_view, name='dashboard-stats'),
+    re_path(r'^dashboard/stats/?$', views.dashboard_stats_view, name='dashboard-stats'),
 
     # Challenges
-    path('challenges', views.challenges_list_create_view, name='challenges-list-create'),
-    path('challenges/<int:pk>', views.challenge_detail_view, name='challenge-detail'),
+    re_path(r'^challenges/(?P<pk>\d+)/?$', views.challenge_detail_view, name='challenge-detail'),
+    re_path(r'^challenges/?$', views.challenges_list_create_view, name='challenges-list-create'),
 
     # Pomodoro
-    path('pomodoro', views.pomodoro_list_create_view, name='pomodoro-list-create'),
+    re_path(r'^pomodoro/?$', views.pomodoro_list_create_view, name='pomodoro-list-create'),
 
     # Labels
-    path('labels', views.labels_list_create_view, name='labels-list-create'),
-    path('labels/<int:pk>', views.label_delete_view, name='label-delete'),
+    re_path(r'^labels/(?P<pk>\d+)/?$', views.label_delete_view, name='label-delete'),
+    re_path(r'^labels/?$', views.labels_list_create_view, name='labels-list-create'),
 
     # Trash
-    path('trash', views.trash_list_view, name='trash-list'),
-    path('trash/<int:pk>/restore', views.trash_restore_view, name='trash-restore'),
-    path('trash/<int:pk>', views.trash_delete_permanent_view, name='trash-delete-permanent'),
-    path('trash/empty', views.trash_empty_view, name='trash-empty'),
+    re_path(r'^trash/(?P<pk>\d+)/restore/?$', views.trash_restore_view, name='trash-restore'),
+    re_path(r'^trash/(?P<pk>\d+)/?$', views.trash_delete_permanent_view, name='trash-delete-permanent'),
+    re_path(r'^trash/empty/?$', views.trash_empty_view, name='trash-empty'),
+    re_path(r'^trash/?$', views.trash_list_view, name='trash-list'),
 ]

@@ -1,3 +1,4 @@
+from datetime import date
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -181,7 +182,7 @@ class HabitSerializer(serializers.ModelSerializer):
 
 
 class ChallengeSerializer(serializers.ModelSerializer):
-    startDate = serializers.DateField(source='start_date')
+    startDate = serializers.DateField(source='start_date', required=False, default=date.today)
     durationDays = serializers.IntegerField(source='duration_days', default=21)
     isCompleted = serializers.BooleanField(source='is_completed', default=False)
 
