@@ -110,7 +110,7 @@ export default function HabitModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form className="modal-form" onSubmit={handleSubmit}>
           <div className="modal-body">
             <div className="form-group">
               <label>Name *</label>
